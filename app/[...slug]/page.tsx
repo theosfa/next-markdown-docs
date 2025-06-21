@@ -1,15 +1,21 @@
-'use server';
+"use server"
 
 import { getPostData } from "@/lib/posts";
 import { notFound } from "next/navigation";
 import "github-markdown-css/github-markdown.css";
+import { use } from "react";
 
 type Props = {
-  params: { slug: string[] };
+  params: Promise<{ slug: string[] }>;
 };
 
 export default async function Page({ params }: Props) {
-  const post = await getPostData(params.slug);
+  const { slug } = await params;
+
+  const post = await getPostData(slug);
+  if (!post) {
+    notFound();
+  }
 
   return (
     <div className="flex justify-center px-4 py-8">
@@ -22,4 +28,3 @@ export default async function Page({ params }: Props) {
     </div>
   );
 }
-
