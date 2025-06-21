@@ -19,6 +19,7 @@ export const metadata: Metadata = {
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
+import { Toaster } from "@/components/ui/sonner";
 
 export default function RootLayout({
   children,
@@ -32,9 +33,10 @@ export default function RootLayout({
       >
         <SidebarProvider>
           <AppSidebar />
-          <main>
+          <main className="flex-1">
             <SidebarTrigger />
             {children}
+            <Toaster />
           </main>
         </SidebarProvider>
       </body>

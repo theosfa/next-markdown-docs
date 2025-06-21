@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "react-markdown-editor-lite/lib/index.css";
+/* @import "react-markdown-editor-lite/lib/index.css"; */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 
 @custom-variant dark (&:is(.dark *));
 

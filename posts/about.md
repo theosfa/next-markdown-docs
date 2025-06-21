@@ -1,8 +1,7 @@
 ---
-title: 'About me'
-date: '2020-01-01'
+title: About me
 ---
- 
+
 ## Hi there 👋
 ### My name is Fedor Alekseyev
 Studing at CyberSecurity and learning Python

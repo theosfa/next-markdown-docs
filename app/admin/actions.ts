@@ -2,23 +2,9 @@
 
 import fs from 'fs';
 import path from 'path';
+import { slugify } from '@/lib/slugify'
 
 const postsDir = path.join(process.cwd(), 'posts');
-
-// export async function listMarkdownFiles(): Promise<{ name: string; fullPath: string }[]> {
-//   function walk(dir: string): { name: string; fullPath: string }[] {
-//     const entries = fs.readdirSync(dir, { withFileTypes: true });
-//     return entries.flatMap((entry) => {
-//       const fullPath = path.join(dir, entry.name);
-//       return entry.isDirectory()
-//         ? walk(fullPath)
-//         : entry.name.endsWith('.md')
-//         ? [{ name: path.relative(postsDir, fullPath), fullPath }]
-//         : [];
-//     });
-//   }
-//   return walk(postsDir);
-// }
 
 export async function readMarkdownFile(filePath: string) {
   const absPath = path.join(postsDir, filePath);
@@ -54,4 +40,31 @@ export async function listMarkdownFiles(): Promise<string[]> {
     return result;
   }
   return walk(postsDirectory);
+}
+
+
+export async function createAction(formData: FormData) {
+  const title = formData.get('title') as string;
+  const content = formData.get('content') as string;
+
+  const slug = slugify(title);
+  const filePath = `${slug}.md`;
+
+  const markdownWithFrontmatter = `---\ntitle: ${title}\n---\n\n${content}`;
+
+  await writeMarkdownFile(filePath, markdownWithFrontmatter);
+
+  // redirect or return as needed
+}
+
+export async function updateAction(formData: FormData) {
+  const id = formData.get('id') as string; // the filename (like 'my-post.md')
+  const title = formData.get('title') as string;
+  const content = formData.get('content') as string;
+
+  const markdownWithFrontmatter = `---\ntitle: ${title}\n---\n\n${content}`;
+
+  await writeMarkdownFile(id, markdownWithFrontmatter);
+
+  // redirect or return as needed
 }

@@ -14,7 +14,9 @@ export default async function Page({ params }: Props) {
   return (
     <div className="flex justify-center px-4 py-8">
       <article className="markdown-body max-w-3xl w-full">
-        <h1>{post.title}</h1>
+        <h1 className="scroll-m-20 text-center text-4xl font-extrabold tracking-tight text-balance">
+          {post.title}
+        </h1>
         <div dangerouslySetInnerHTML={{ __html: post.contentHtml }} />
       </article>
     </div>
