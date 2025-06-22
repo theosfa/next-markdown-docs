@@ -3,9 +3,9 @@ title: About me
 ---
 
 
+
 ## Hi there 👋
 ### My name is Fedor Alekseyev
-My wife  is Dariia Shevchuk.  
 Studing at CyberSecurity and learning Python
 This is my progress on [Roadmap.sh](roadmap.sh)
 
