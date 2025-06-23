@@ -72,70 +72,88 @@ export type SidebarNode = {
 };
 
 // Internal type for organizing files
+
+
 type InternalNode = {
   rawName: string;
   fullPath: string;
   slugParts: string[];
+  title: string;
 };
 
-export function buildSidebarTree(files: { path: string }[]): SidebarNode[] {
-  const tree: Record<string, InternalNode[]> = {};
+export async function buildSidebarTree(): Promise<SidebarNode[]> {
+  // 1. List all markdown files in the repo
+  const files = await listRepoFiles(); // [{ path: "posts/foo.md" }, ...]
 
-  for (const file of files) {
-    if (!file.path.endsWith(".md")) continue;
-    const cleaned = file.path.replace(/^posts\//, "");
-    const parts = cleaned.split("/");
-    const filename = parts.pop()!;
-    const folderPath = parts.map(slugify).join("/");
+  // 2. Load frontmatter titles for each
+  const internalNodes: InternalNode[] = await Promise.all(
+    files
+      .filter((f) => f.path.endsWith(".md"))
+      .map(async (f) => {
+        // path relative to posts/
+        const cleaned = f.path.replace(/^posts\//, "");
+        const parts = cleaned.split("/");
+        const filename = parts.pop()!;                // e.g. "hello.md"
+        const slugParts = parts.map(slugify);         // e.g. ["nested"]
+        const name = filename.replace(/\.md$/, "");   // "hello"
+        
+        // fetch and parse frontmatter
+        const { content } = await getFileContent(f.path);
+        const { data } = matter(content);
 
-    tree[folderPath] ||= [];
-    tree[folderPath].push({
-      rawName: filename,
-      fullPath: file.path,
-      slugParts: parts.map(slugify),
-    });
+        return {
+          rawName: name,
+          fullPath: f.path,
+          slugParts,
+          title: (data.title as string) ?? name,  // use frontmatter title if present
+        };
+      })
+  );
+
+  // 3. Build a map by folder
+  const treeMap: Record<string, InternalNode[]> = {};
+  for (const node of internalNodes) {
+    const folderKey = node.slugParts.join("/");
+    ;(treeMap[folderKey] ||= []).push(node);
   }
 
+  // 4. Recursive builder
   function buildNodes(base = ""): SidebarNode[] {
     const nodes: SidebarNode[] = [];
 
-    const current = tree[base] || [];
-    for (const file of current) {
-      const name = file.rawName.replace(/\.md$/, "");
-      const slug = slugify(name);
+    // files at this level
+    (treeMap[base] || []).forEach((file) => {
+      const slug = slugify(file.rawName);
       const url = "/" + [...file.slugParts, slug].join("/");
-
       nodes.push({
         type: "file",
-        name,
-        title: name,
+        name: file.rawName,
+        title: file.title,
         url,
       });
-    }
+    });
 
-    const childKeys = Object.keys(tree)
-      .filter(k => k.startsWith(base === "" ? "" : base + "/"))
-      .map(k => {
-        const parts = k.split("/");
-        return parts[base === "" ? 0 : base.split("/").length];
-      })
+    // subfolders
+    const childFolders = Object.keys(treeMap)
+      .filter((k) => k.startsWith(base === "" ? "" : base + "/"))
+      .map((k) => k.split("/")[base === "" ? 0 : base.split("/").length])
       .filter((v, i, a) => !!v && a.indexOf(v) === i);
 
-    for (const child of childKeys) {
-      const fullPath = base === "" ? child : `${base}/${child}`;
+    childFolders.forEach((folder) => {
+      const path = base === "" ? folder : `${base}/${folder}`;
       nodes.push({
         type: "folder",
-        name: child,
-        children: buildNodes(fullPath),
+        name: folder,
+        title: folder,
+        children: buildNodes(path),
       });
-    }
+    });
 
     return nodes;
   }
 
   return buildNodes();
 }
-
 export async function getSidebarTree(): Promise<SidebarNode[]> {
   const files = await listRepoFiles(); // from GitHub repo
   return buildSidebarTree(files);
