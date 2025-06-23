@@ -63,7 +63,7 @@ import rehypeStringify from "rehype-stringify";
 import { listRepoFiles, getFileContent } from "./github";
 import { slugify } from "@/lib/slugify";
 
-type SidebarNode = {
+export type SidebarNode = {
   type: "folder" | "file";
   name: string;
   title?: string;
