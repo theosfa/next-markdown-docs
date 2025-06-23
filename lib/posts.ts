@@ -142,7 +142,7 @@ export async function getSidebarTree(): Promise<SidebarNode[]> {
 }
 
 export async function getPostData(slug: string[]) {
-  const filename = slug.map(slugify).join("/") + ".md";
+  const filename = findMarkdownFileBySlug(slug);
   const path = `posts/${filename}`;
   const { content } = await getFileContent(path);
   const { data, content: rawContent } = matter(content);
