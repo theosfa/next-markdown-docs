@@ -1,134 +1,57 @@
-// import fs from "fs";
-// import path from "path";
-// import matter from "gray-matter";
-// import { remark } from "remark";
-// import html from "remark-html";
-// import remarkHtml from "remark-html";
-// import rehypeHighlight from "rehype-highlight";
-// import { unified } from "unified";
-// import remarkParse from "remark-parse";
-// import remarkRehype from "remark-rehype";
-// import rehypeStringify from "rehype-stringify";
-// import 'highlight.js/styles/github.css'; // ← this imports GitHub style
-// import { slugify } from "@/lib/slugify"; // Adjust the import path as needed
+import fs from "fs";
+import path from "path";
+import { remark } from "remark";
+import html from "remark-html";
+import remarkHtml from "remark-html";
+import 'highlight.js/styles/github.css'; // ← this imports GitHub style
 
 
 
-// const postsDirectory = path.join(process.cwd(), "posts");
-
-// type SidebarNode = {
-//   type: "folder" | "file";
-//   name: string;
-//   url?: string;
-//   title?: string;
-//   children?: SidebarNode[];
-// };
-
-// /**
-//  * Recursively builds the sidebar tree with full folder structure
-//  */
-// function buildSidebarTree(dir: string, base = ""): SidebarNode[] {
-//   const entries = fs.readdirSync(dir, { withFileTypes: true });
-//   const nodes: SidebarNode[] = [];
-
-//   for (const entry of entries) {
-//     const fullPath = path.join(dir, entry.name);
-//     const isDir = entry.isDirectory();
-//     const isMarkdown = entry.isFile() && entry.name.endsWith(".md");
-
-//     if (isDir) {
-//       const slug = slugify(entry.name);
-//       const subTree = buildSidebarTree(fullPath, path.join(base, slug));
-//       nodes.push({
-//         type: "folder",
-//         name: entry.name,
-//         children: subTree,
-//       });
-//     }
-
-//     if (isMarkdown) {
-//       const fileContents = fs.readFileSync(fullPath, "utf8");
-//       const { data } = matter(fileContents);
-
-//       const filename = entry.name.replace(/\.md$/, "");
-//       const slugSegment = slugify(filename);
-//       const slugPath = path.join(base, slugSegment).replace(/\\/g, "/");
-
-//       nodes.push({
-//         type: "file",
-//         name: filename,
-//         title: data.title || filename,
-//         url: `/${slugPath}`,
-//       });
-//     }
-//   }
-
-//   return nodes;
-// }
+const postsDirectory = path.join(process.cwd(), "posts");
 
 
-// export function getSidebarTree(): SidebarNode[] {
-//   return buildSidebarTree(postsDirectory);
-// }
+/**
+ * Recursively builds the sidebar tree with full folder structure
+ */
 
 
-// /**
-//  * Resolves a full file path by slug array (e.g. ['folder', 'file'])
-//  */
-// export function findMarkdownFileBySlug(slugSegments: string[]): string | null {
-//   function walk(dir: string, baseSegments: string[] = []): string | null {
-//     const entries = fs.readdirSync(dir, { withFileTypes: true });
+/**
+ * Resolves a full file path by slug array (e.g. ['folder', 'file'])
+ */
+export function findMarkdownFileBySlug(slugSegments: string[]): string | null {
+  function walk(dir: string, baseSegments: string[] = []): string | null {
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
 
-//     for (const entry of entries) {
-//       const fullPath = path.join(dir, entry.name);
+    for (const entry of entries) {
+      const fullPath = path.join(dir, entry.name);
 
-//       if (entry.isDirectory()) {
-//         const nextBase = [...baseSegments, slugify(entry.name)];
-//         const found = walk(fullPath, nextBase);
-//         if (found) return found;
-//       }
+      if (entry.isDirectory()) {
+        const nextBase = [...baseSegments, slugify(entry.name)];
+        const found = walk(fullPath, nextBase);
+        if (found) return found;
+      }
 
-//       if (entry.isFile() && entry.name.endsWith(".md")) {
-//         const filename = entry.name.replace(/\.md$/, "");
-//         const currentSlug = [...baseSegments, slugify(filename)];
+      if (entry.isFile() && entry.name.endsWith(".md")) {
+        const filename = entry.name.replace(/\.md$/, "");
+        const currentSlug = [...baseSegments, slugify(filename)];
 
-//         if (currentSlug.join("/") === slugSegments.join("/")) {
-//           return fullPath;
-//         }
-//       }
-//     }
+        if (currentSlug.join("/") === slugSegments.join("/")) {
+          return fullPath;
+        }
+      }
+    }
 
-//     return null;
-//   }
+    return null;
+  }
 
-//   return walk(postsDirectory);
-// }
+  return walk(postsDirectory);
+}
 
 
-// /**
-//  * Loads post content by slug segments
-//  */
-// export async function getPostData(slug: string[]) {
-//   const filePath = findMarkdownFileBySlug(slug);
-//   if (!filePath) throw new Error(`Post "${slug.join("/")}" not found`);
+/**
+ * Loads post content by slug segments
+ */
 
-//   const fileContents = fs.readFileSync(filePath, "utf8");
-//   const { data, content } = matter(fileContents);
-
-//   const processedContent = await unified()
-//     .use(remarkParse)
-//     .use(remarkRehype)
-//     .use(rehypeHighlight)
-//     .use(rehypeStringify)
-//     .process(content);
-
-//   const contentHtml = processedContent.toString();
-
-//   return {
-//     title: data.title || slug.at(-1) || "Untitled",
-//     contentHtml,
-//   };
-// }
 
 // lib/posts.ts
 import matter from "gray-matter";
@@ -155,7 +78,7 @@ type InternalNode = {
   slugParts: string[];
 };
 
-function buildSidebarTree(files: { path: string }[]): SidebarNode[] {
+export function buildSidebarTree(files: { path: string }[]): SidebarNode[] {
   const tree: Record<string, InternalNode[]> = {};
 
   for (const file of files) {
