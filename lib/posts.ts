@@ -142,6 +142,7 @@ export async function getSidebarTree(): Promise<SidebarNode[]> {
 }
 
 export async function getPostData(slug: string[]) {
+  console.log("getPostData", slug);
   const filename = findMarkdownFileBySlug(slug);
   const path = `posts/${filename}`;
   const { content } = await getFileContent(path);
