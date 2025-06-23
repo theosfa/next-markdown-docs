@@ -154,7 +154,7 @@ export async function getPostData(slug: string[]) {
     ? filename.slice(postsDir.length) // yields "/Another folder/hello.md"
     : filename;
   console.log("Found file:", filename);
-  const path = `posts/${filename}`;
+  const path = `posts/${urlPath}`;
   const { content } = await getFileContent(path);
   const { data, content: rawContent } = matter(content);
 
