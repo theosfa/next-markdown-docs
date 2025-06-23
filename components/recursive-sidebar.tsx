@@ -93,7 +93,7 @@ export function RecursiveSidebar({ nodes }: { nodes: SidebarNode[] }) {
                   <SidebarMenuButton>
                     <ChevronRight className="transition-transform w-4 h-4" />
                     <Folder className="w-4 h-4" />
-                    <span>{node.name}</span>
+                    <span>{node.title}</span>
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
